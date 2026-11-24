@@ -1,4 +1,4 @@
-// js/app.js - Main Application Controller & Canvas Animation Loop
+// js/app.js - Main Application Controller & Canvas Animation Loop (Mobile & PC Enhanced)
 class App {
   constructor() {
     this.skyCanvas = document.getElementById('sky-canvas');
@@ -14,7 +14,6 @@ class App {
     this.shootingStars = [];
     this.selectedKrathongType = 'traditional';
     this.selectedCandleColor = 'gold';
-    this.userKrathongCount = 0;
 
     this.time = 0;
     this.lastFrameTime = performance.now();
@@ -25,6 +24,9 @@ class App {
   init() {
     this.resizeCanvases();
     window.addEventListener('resize', () => this.resizeCanvases());
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => this.resizeCanvases(), 200);
+    });
 
     this.initStars();
     this.initKrathongOptions();
@@ -50,7 +52,7 @@ class App {
 
   initStars() {
     this.stars = [];
-    const count = Math.floor((window.innerWidth * window.innerHeight) / 4500);
+    const count = Math.floor((window.innerWidth * window.innerHeight) / 5000);
     for (let i = 0; i < count; i++) {
       this.stars.push({
         x: Math.random() * window.innerWidth,
@@ -120,7 +122,6 @@ class App {
         document.querySelectorAll('.candle-choice').forEach(el => el.classList.remove('selected'));
         choice.classList.add('selected');
         this.selectedCandleColor = c.id;
-        // Refresh preview thumbnails
         this.initKrathongOptions();
       });
 
@@ -265,7 +266,6 @@ class App {
         const y = window.innerHeight * 0.8;
         window.lanternSystem.release(x, y, wishText, nameText);
 
-        // Also release a few background buddy lanterns
         setTimeout(() => {
           window.lanternSystem.release(x - 90, y + 20);
           window.lanternSystem.release(x + 90, y + 30);
@@ -275,26 +275,38 @@ class App {
       });
     }
 
-    // River Canvas Interaction (Click Krathong or Launch Fireworks on Sky)
-    this.riverCanvas.addEventListener('click', (e) => {
+    // River Canvas Interaction (Click & Touch support for Mobile and PC)
+    const handleActionPoint = (clientX, clientY) => {
       const rect = this.riverCanvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
 
-      // First check if clicked on a floating krathong
+      // Check if clicked or tapped on a floating krathong or its wish card
       const clickedKrathong = window.riverSystem.checkHover(x, y);
       if (clickedKrathong) {
         this.showWishCard(clickedKrathong);
         return;
       }
 
-      // If clicked on Sky portion (< 52% height), launch fireworks!
+      // If clicked or tapped on sky portion, launch fireworks!
       if (y < window.innerHeight * 0.52) {
         window.fireworksSystem.launch(x, y);
       }
+    };
+
+    // PC Click
+    this.riverCanvas.addEventListener('click', (e) => {
+      handleActionPoint(e.clientX, e.clientY);
     });
 
-    // Hover effect on krathongs
+    // Mobile Touch
+    this.riverCanvas.addEventListener('touchstart', (e) => {
+      if (e.touches && e.touches.length > 0) {
+        handleActionPoint(e.touches[0].clientX, e.touches[0].clientY);
+      }
+    }, { passive: true });
+
+    // PC Mouse Hover
     this.riverCanvas.addEventListener('mousemove', (e) => {
       const rect = this.riverCanvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -303,7 +315,24 @@ class App {
       this.riverCanvas.style.cursor = hovered ? 'pointer' : (y < window.innerHeight * 0.52 ? 'crosshair' : 'default');
     });
 
-    // Initialize audio on first click anywhere on screen
+    // PC Keyboard Shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.code === 'Space') {
+        e.preventDefault();
+        this.openModal('krathong-modal');
+      } else if (e.key === 'm' || e.key === 'M') {
+        const btnMusic = document.getElementById('btn-toggle-music');
+        if (btnMusic) btnMusic.click();
+      } else if (e.key === 'f' || e.key === 'F') {
+        const btnAuto = document.getElementById('btn-auto-fireworks');
+        if (btnAuto) btnAuto.click();
+      } else if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+      }
+    });
+
+    // Audio init on first interaction
     document.addEventListener('pointerdown', () => {
       window.soundSystem.init();
     }, { once: true });
@@ -363,6 +392,7 @@ class App {
     const w = this.skyCanvas.width;
     const h = this.skyCanvas.height;
     const ctx = this.skyCtx;
+    const isMobile = window.innerWidth <= 768;
 
     ctx.clearRect(0, 0, w, h);
 
@@ -410,9 +440,12 @@ class App {
     }
 
     // Full Moon (วันเพ็ญเดือน ๑๒)
-    this.drawFullMoon(ctx, w * 0.78, h * 0.2, 54, time);
+    const moonX = w * (isMobile ? 0.72 : 0.78);
+    const moonY = h * (isMobile ? 0.22 : 0.2);
+    const moonRadius = isMobile ? 38 : 54;
+    this.drawFullMoon(ctx, moonX, moonY, moonRadius, time);
 
-    // Distant Thai Temple Silhouettes & Mountains along River Horizon
+    // Horizon Silhouettes
     this.drawHorizonSilhouettes(ctx, w, h * 0.52);
   }
 
@@ -444,7 +477,7 @@ class App {
     ctx.arc(cx, cy, radius, 0, Math.PI * 2);
     ctx.fill();
 
-    // Subtle Maria / Craters (เงากระต่ายบนดวงจันทร์)
+    // Subtle Maria / Craters
     ctx.fillStyle = 'rgba(180, 150, 110, 0.18)';
     ctx.beginPath();
     ctx.ellipse(cx - radius * 0.25, cy - radius * 0.1, radius * 0.28, radius * 0.22, 0.3, 0, Math.PI * 2);
@@ -470,12 +503,12 @@ class App {
     ctx.quadraticCurveTo(w * 0.15, horizonY - 35, w * 0.3, horizonY - 14);
     ctx.quadraticCurveTo(w * 0.45, horizonY - 40, w * 0.6, horizonY - 20);
 
-    // Thai Chedi / Temple Spire silhouette at w * 0.7
-    const chediX = w * 0.68;
+    // Thai Chedi silhouette
+    const chediX = w * (window.innerWidth <= 768 ? 0.62 : 0.68);
     ctx.lineTo(chediX - 25, horizonY - 12);
     ctx.lineTo(chediX - 15, horizonY - 30);
     ctx.lineTo(chediX - 8, horizonY - 45);
-    ctx.lineTo(chediX, horizonY - 80); // Peak
+    ctx.lineTo(chediX, horizonY - 80);
     ctx.lineTo(chediX + 8, horizonY - 45);
     ctx.lineTo(chediX + 15, horizonY - 30);
     ctx.lineTo(chediX + 25, horizonY - 12);
@@ -492,19 +525,18 @@ class App {
     this.lastFrameTime = currentTime;
     this.time += dt;
 
-    // 1. Draw Sky (Stars, Moon, Shooting stars)
+    // 1. Sky
     this.drawSky(this.time);
 
-    // 2. Update & Draw Fireworks
+    // 2. Fireworks & Lanterns
     this.fireworksCtx.clearRect(0, 0, this.fireworksCanvas.width, this.fireworksCanvas.height);
     window.fireworksSystem.update();
     window.fireworksSystem.draw(this.fireworksCtx);
 
-    // 3. Update & Draw Lanterns (on Fireworks canvas layer)
     window.lanternSystem.update();
     window.lanternSystem.draw(this.fireworksCtx, this.time);
 
-    // 4. Update & Draw River & Floating Krathongs
+    // 3. River & Floating Krathongs
     this.riverCtx.clearRect(0, 0, this.riverCanvas.width, this.riverCanvas.height);
     window.riverSystem.update(dt, this.time);
     window.riverSystem.draw(this.riverCtx, this.time);
@@ -513,7 +545,6 @@ class App {
   }
 }
 
-// Boot on DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
   window.app = new App();
 });

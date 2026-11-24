@@ -1,4 +1,4 @@
-/* style.css - Loy Krathong Festival Web Stylesheet */
+/* style.css - Loy Krathong Festival Web Stylesheet (Mobile & PC Optimized) */
 @import url('https://fonts.googleapis.com/css2?family=Charm:wght@400;700&family=Kanit:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600&display=swap');
 
 :root {
@@ -7,8 +7,8 @@
   --thai-gold: #e6b800;
   --night-deep: #050b14;
   --water-blue: #0a192f;
-  --glass-bg: rgba(13, 25, 48, 0.75);
-  --glass-border: rgba(255, 215, 0, 0.25);
+  --glass-bg: rgba(13, 25, 48, 0.78);
+  --glass-border: rgba(255, 215, 0, 0.28);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
   --text-primary: #ffffff;
   --text-secondary: #e0e6ed;
@@ -24,15 +24,17 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-body {
-  font-family: 'Kanit', 'Sarabun', sans-serif;
+html, body {
+  width: 100%;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
   background-color: var(--night-deep);
   color: var(--text-primary);
-  overflow: hidden;
-  width: 100vw;
-  height: 100vh;
+  font-family: 'Kanit', 'Sarabun', sans-serif;
   position: relative;
   user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Canvas Layers */
@@ -58,37 +60,37 @@ canvas {
 #fireworks-canvas { z-index: 3; pointer-events: none; }
 #river-canvas { z-index: 4; }
 
-/* Header & Navigation */
+/* Top Header Bar */
 .header-bar {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  padding: 16px 24px;
+  padding: 14px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   z-index: 20;
-  background: linear-gradient(180deg, rgba(5, 11, 20, 0.85) 0%, rgba(5, 11, 20, 0) 100%);
+  background: linear-gradient(180deg, rgba(5, 11, 20, 0.88) 0%, rgba(5, 11, 20, 0) 100%);
   pointer-events: none;
 }
 
 .brand-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   pointer-events: auto;
 }
 
 .brand-icon {
-  font-size: 2rem;
+  font-size: 1.85rem;
   filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
   animation: gentlePulse 3s ease-in-out infinite;
 }
 
 .brand-text h1 {
   font-family: 'Charm', cursive;
-  font-size: 1.85rem;
+  font-size: 1.65rem;
   font-weight: 700;
   background: var(--gold-gradient);
   -webkit-background-clip: text;
@@ -98,24 +100,25 @@ canvas {
 }
 
 .brand-text p {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: #ffecb3;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .top-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   pointer-events: auto;
 }
 
 .control-btn {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
   color: var(--text-primary);
-  padding: 8px 14px;
+  padding: 8px 12px;
   border-radius: 30px;
   font-size: 0.85rem;
   font-family: 'Kanit', sans-serif;
@@ -123,8 +126,9 @@ canvas {
   display: flex;
   align-items: center;
   gap: 6px;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   box-shadow: var(--glass-shadow);
+  touch-action: manipulation;
 }
 
 .control-btn:hover {
@@ -142,31 +146,54 @@ canvas {
   box-shadow: 0 0 18px rgba(255, 193, 7, 0.6);
 }
 
+/* Sky Click Hint */
+.sky-click-hint {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(5, 15, 30, 0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  color: #ffecb3;
+  z-index: 10;
+  pointer-events: none;
+  opacity: 0.92;
+  white-space: nowrap;
+  animation: fadeInOut 4s ease-in-out infinite alternate;
+}
+
 /* Floating Action Dock (Bottom Bar) */
 .floating-dock {
   position: absolute;
-  bottom: 24px;
+  bottom: max(20px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   z-index: 25;
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
-  padding: 10px 18px;
+  -webkit-backdrop-filter: blur(16px);
+  padding: 10px 16px;
   border-radius: 40px;
   border: 1px solid var(--glass-border);
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.65);
+  max-width: 95vw;
 }
 
 .action-btn-main {
   background: var(--gold-gradient);
   color: #3e2723;
   border: none;
-  padding: 12px 26px;
+  padding: 12px 24px;
   border-radius: 30px;
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   font-family: 'Kanit', sans-serif;
   cursor: pointer;
@@ -176,10 +203,12 @@ canvas {
   transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   box-shadow: 0 4px 20px rgba(255, 193, 7, 0.5);
   animation: glowFloat 2.5s ease-in-out infinite;
+  white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .action-btn-main:hover {
-  transform: scale(1.06) translateY(-2px);
+  transform: scale(1.05) translateY(-2px);
   box-shadow: 0 6px 28px rgba(255, 215, 0, 0.8);
 }
 
@@ -187,9 +216,9 @@ canvas {
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 10px 18px;
+  padding: 10px 16px;
   border-radius: 30px;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   font-family: 'Kanit', sans-serif;
   cursor: pointer;
@@ -197,31 +226,14 @@ canvas {
   align-items: center;
   gap: 6px;
   transition: all 0.2s ease;
+  white-space: nowrap;
+  touch-action: manipulation;
 }
 
 .action-btn-secondary:hover {
   background: rgba(255, 255, 255, 0.22);
   border-color: rgba(255, 215, 0, 0.6);
   transform: translateY(-2px);
-}
-
-/* Floating Hint */
-.sky-click-hint {
-  position: absolute;
-  top: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(5, 15, 30, 0.65);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  padding: 6px 18px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #ffecb3;
-  z-index: 10;
-  pointer-events: none;
-  opacity: 0.9;
-  animation: fadeInOut 4s ease-in-out infinite alternate;
 }
 
 /* Modals */
@@ -231,16 +243,18 @@ canvas {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(2, 6, 15, 0.78);
+  height: 100dvh;
+  background: rgba(2, 6, 15, 0.82);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 100;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
-  padding: 16px;
+  transition: opacity 0.28s ease;
+  padding: 14px;
 }
 
 .modal-overlay.active {
@@ -249,18 +263,19 @@ canvas {
 }
 
 .modal-card {
-  background: linear-gradient(145deg, rgba(16, 32, 60, 0.92) 0%, rgba(8, 18, 38, 0.96) 100%);
+  background: linear-gradient(145deg, rgba(16, 32, 60, 0.94) 0%, rgba(8, 18, 38, 0.98) 100%);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.75);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 580px;
-  max-height: 90vh;
+  max-height: 88dvh;
   overflow-y: auto;
-  padding: 28px;
+  -webkit-overflow-scrolling: touch;
+  padding: 24px;
   position: relative;
   transform: scale(0.92) translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .modal-overlay.active .modal-card {
@@ -271,18 +286,18 @@ canvas {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
   border-bottom: 1px solid rgba(255, 215, 0, 0.2);
   padding-bottom: 12px;
 }
 
 .modal-title {
   font-family: 'Charm', cursive;
-  font-size: 1.8rem;
+  font-size: 1.65rem;
   color: var(--primary-gold);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .modal-close-btn {
@@ -298,6 +313,7 @@ canvas {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
+  touch-action: manipulation;
 }
 
 .modal-close-btn:hover {
@@ -308,7 +324,7 @@ canvas {
 
 /* Krathong Selector Grid */
 .section-label {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: #ffecb3;
   margin-bottom: 10px;
@@ -320,25 +336,26 @@ canvas {
 .krathong-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
 .krathong-option {
   background: rgba(255, 255, 255, 0.05);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-md);
-  padding: 10px;
+  padding: 10px 8px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.22s ease;
   position: relative;
+  touch-action: manipulation;
 }
 
 .krathong-option:hover {
   background: rgba(255, 215, 0, 0.1);
   border-color: rgba(255, 215, 0, 0.5);
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 .krathong-option.selected {
@@ -365,14 +382,14 @@ canvas {
 }
 
 .krathong-preview-img {
-  width: 72px;
-  height: 72px;
+  width: 68px;
+  height: 68px;
   margin: 0 auto 6px;
   display: block;
 }
 
 .krathong-option-name {
-  font-size: 0.85rem;
+  font-size: 0.84rem;
   font-weight: 600;
   color: #ffffff;
   line-height: 1.2;
@@ -381,14 +398,15 @@ canvas {
 .krathong-option-sub {
   font-size: 0.72rem;
   color: #b0bec5;
-  margin-top: 2px;
+  margin-top: 3px;
+  line-height: 1.2;
 }
 
 /* Candle Color Selection */
 .candle-selector {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 8px;
+  margin-bottom: 18px;
 }
 
 .candle-choice {
@@ -397,13 +415,14 @@ canvas {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 10px;
+  padding: 8px 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radius-sm);
   cursor: pointer;
   font-size: 0.8rem;
   transition: all 0.2s;
+  touch-action: manipulation;
 }
 
 .candle-choice:hover {
@@ -412,7 +431,7 @@ canvas {
 
 .candle-choice.selected {
   border-color: var(--primary-gold);
-  background: rgba(255, 215, 0, 0.15);
+  background: rgba(255, 215, 0, 0.18);
   font-weight: 600;
 }
 
@@ -423,14 +442,14 @@ canvas {
   box-shadow: 0 0 6px currentColor;
 }
 
-/* Form Inputs */
+/* Form Inputs (16px to prevent iOS auto-zoom) */
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
 .form-label {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: #ffecb3;
   margin-bottom: 6px;
@@ -443,7 +462,7 @@ canvas {
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 16px; /* Prevents mobile Safari zoom */
   font-family: 'Kanit', sans-serif;
   transition: border-color 0.2s;
   outline: none;
@@ -451,12 +470,12 @@ canvas {
 
 .form-input:focus, .form-textarea:focus {
   border-color: var(--primary-gold);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.35);
 }
 
 .form-textarea {
   resize: vertical;
-  min-height: 85px;
+  min-height: 80px;
 }
 
 /* Quick Wish Tags */
@@ -471,11 +490,12 @@ canvas {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 16px;
-  padding: 4px 10px;
+  padding: 5px 10px;
   font-size: 0.78rem;
   color: #cfd8dc;
   cursor: pointer;
   transition: all 0.2s;
+  touch-action: manipulation;
 }
 
 .wish-tag:hover {
@@ -490,9 +510,9 @@ canvas {
   background: var(--gold-gradient);
   border: none;
   color: #3e2723;
-  padding: 14px;
+  padding: 13px;
   border-radius: 30px;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
   font-family: 'Kanit', sans-serif;
   cursor: pointer;
@@ -502,6 +522,7 @@ canvas {
   justify-content: center;
   gap: 8px;
   transition: all 0.25s;
+  touch-action: manipulation;
 }
 
 .submit-btn:hover {
@@ -509,46 +530,46 @@ canvas {
   box-shadow: 0 6px 28px rgba(255, 215, 0, 0.8);
 }
 
-/* Wish View Modal (Click on Floating Krathong) */
+/* Wish View Modal */
 .wish-card-display {
   text-align: center;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .wish-card-avatar {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 16px;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.2) 0%, rgba(0, 0, 0, 0) 70%);
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 12px;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .wish-card-name {
-  font-size: 1.4rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--primary-gold);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 
 .wish-card-date {
   font-size: 0.8rem;
   color: #90a4ae;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .wish-card-quote {
   font-family: 'Sarabun', sans-serif;
-  font-size: 1.1rem;
-  line-height: 1.7;
+  font-size: 1.05rem;
+  line-height: 1.65;
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
   border-left: 3px solid var(--primary-gold);
-  padding: 16px 20px;
+  padding: 14px 18px;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
   text-align: left;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .wish-card-actions {
@@ -569,42 +590,125 @@ canvas {
 }
 
 @keyframes fadeInOut {
-  0% { opacity: 0.4; }
+  0% { opacity: 0.45; }
   100% { opacity: 0.95; }
 }
 
-/* Responsive Media Queries */
+/* ======================================================== */
+/* Responsive Media Queries (Mobile, Tablet, Desktop)       */
+/* ======================================================== */
+
+/* Mobile Phones (up to 768px) */
 @media (max-width: 768px) {
   .header-bar {
-    padding: 12px 16px;
+    padding: 10px 14px;
   }
   .brand-text h1 {
-    font-size: 1.35rem;
+    font-size: 1.25rem;
   }
   .brand-text p {
     display: none;
   }
+  .brand-icon {
+    font-size: 1.5rem;
+  }
+  .top-controls {
+    gap: 6px;
+  }
   .control-btn span {
-    display: none;
+    display: none; /* Icon-only on mobile */
   }
   .control-btn {
     padding: 8px 10px;
+    font-size: 0.95rem;
+  }
+  .sky-click-hint {
+    top: 60px;
+    font-size: 0.75rem;
+    padding: 4px 12px;
+  }
+  .floating-dock {
+    width: 94%;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    padding: 8px 10px;
+    gap: 8px;
+    justify-content: center;
+  }
+  .action-btn-main {
+    padding: 10px 16px;
+    font-size: 0.92rem;
+  }
+  .action-btn-secondary {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+  .action-btn-secondary span:nth-child(2) {
+    display: none; /* Shorten secondary labels on very small screens */
   }
   .krathong-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
-  .floating-dock {
-    width: 92%;
-    bottom: 16px;
-    justify-content: center;
-    padding: 8px 12px;
+  .krathong-preview-img {
+    width: 58px;
+    height: 58px;
+  }
+  .modal-card {
+    padding: 20px 16px;
+    max-height: 85dvh;
+  }
+  .modal-title {
+    font-size: 1.35rem;
+  }
+  .candle-selector {
+    flex-wrap: wrap;
+  }
+  .candle-choice {
+    flex: 1 1 45%;
+    font-size: 0.75rem;
+  }
+}
+
+/* Very Small Screens (width <= 380px) */
+@media (max-width: 380px) {
+  .brand-text h1 {
+    font-size: 1.1rem;
   }
   .action-btn-main {
-    padding: 10px 18px;
-    font-size: 0.95rem;
+    padding: 8px 12px;
+    font-size: 0.85rem;
   }
   .action-btn-secondary {
-    padding: 8px 12px;
-    font-size: 0.8rem;
+    padding: 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* PC / Large Desktop Screens (width >= 1024px) */
+@media (min-width: 1024px) {
+  .header-bar {
+    padding: 18px 32px;
+  }
+  .brand-text h1 {
+    font-size: 2rem;
+  }
+  .brand-text p {
+    font-size: 0.9rem;
+  }
+  .floating-dock {
+    bottom: 28px;
+    padding: 12px 24px;
+    gap: 16px;
+  }
+  .action-btn-main {
+    padding: 13px 30px;
+    font-size: 1.1rem;
+  }
+  .action-btn-secondary {
+    padding: 11px 20px;
+    font-size: 0.95rem;
+  }
+  .modal-card {
+    padding: 32px;
   }
 }

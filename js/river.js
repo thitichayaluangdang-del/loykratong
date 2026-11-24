@@ -1,4 +1,4 @@
-// js/river.js - River Surface, Waves, Water Lighting & Floating Krathongs
+// js/river.js - River Surface, Waves, Water Lighting & Floating Krathongs with Wish Banners
 class FloatingKrathong {
   constructor(options) {
     this.id = options.id || 'krathong_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
@@ -13,25 +13,28 @@ class FloatingKrathong {
     this.x = options.x !== undefined ? options.x : (options.isUser ? window.innerWidth * 0.5 : Math.random() * window.innerWidth);
     this.y = options.y !== undefined ? options.y : (options.isUser ? window.innerHeight * 0.75 : window.innerHeight * (0.62 + Math.random() * 0.28));
 
-    // Dynamic depth perspective (y affects scale: further away = smaller, higher in the river)
+    // Dynamic depth perspective
     this.updateScaleFromY();
 
-    this.vx = (0.25 + Math.random() * 0.35); // drift eastward / rightward
-    this.vy = (Math.random() - 0.48) * 0.08; // subtle vertical river current
+    this.vx = (0.22 + Math.random() * 0.3); // gentle eastward river drift
+    this.vy = (Math.random() - 0.48) * 0.07;
     this.bobPhase = Math.random() * Math.PI * 2;
     this.bobSpeed = 1.6 + Math.random() * 0.6;
     this.tiltPhase = Math.random() * Math.PI * 2;
 
-    // Hover state for interactive click
     this.isHovered = false;
+    this.badgeBounds = null;
   }
 
   updateScaleFromY() {
+    const isMobile = window.innerWidth <= 768;
     const riverTop = window.innerHeight * 0.52;
     const riverBottom = window.innerHeight * 0.95;
     const ratio = Math.max(0, Math.min(1, (this.y - riverTop) / (riverBottom - riverTop)));
-    // Scale ranges from 45px (far horizon) to 105px (close foreground)
-    this.size = 45 + ratio * 60;
+    // Adaptive size for mobile and PC
+    const minSize = isMobile ? 36 : 46;
+    const maxSize = isMobile ? 72 : 105;
+    this.size = minSize + ratio * (maxSize - minSize);
   }
 
   update(dt, time) {
@@ -39,7 +42,7 @@ class FloatingKrathong {
     this.y += this.vy;
     this.updateScaleFromY();
 
-    // Wrap around screen gently if floated far right
+    // Wrap around screen gently if floated past right margin
     if (this.x > window.innerWidth + this.size * 2) {
       this.x = -this.size * 2;
       this.y = window.innerHeight * (0.62 + Math.random() * 0.28);
@@ -49,8 +52,19 @@ class FloatingKrathong {
   containsPoint(px, py) {
     const dx = px - this.x;
     const dy = py - this.y;
-    const radius = this.size * 0.75;
-    return (dx * dx + dy * dy) <= (radius * radius);
+    const radius = this.size * 0.78;
+    if ((dx * dx + dy * dy) <= (radius * radius)) return true;
+
+    // Also check bounding box of the wish card
+    if (this.badgeBounds) {
+      const by = this.y + this.badgeBounds.offsetY;
+      const bw = this.badgeBounds.w;
+      const bh = this.badgeBounds.h;
+      if (px >= this.x - bw / 2 && px <= this.x + bw / 2 && py >= by && py <= by + bh) {
+        return true;
+      }
+    }
+    return false;
   }
 
   draw(ctx, time) {
@@ -63,14 +77,14 @@ class FloatingKrathong {
     ctx.translate(this.x, this.y + bob);
     ctx.rotate(tilt);
 
-    // Candle reflection on the water surface (shimmering downwards)
+    // Candle reflection on the water surface
     this.drawReflection(ctx, time);
 
     // Draw Krathong Body
     window.KrathongRenderer.drawKrathong(ctx, this.type, this.candleColor, this.size, time);
 
-    // Draw Name Tag & Badge
-    this.drawNameTag(ctx, time);
+    // Draw Wish & Name Banner (แสดงข้อความที่ขอและชื่ออย่างชัดเจน)
+    this.drawWishTag(ctx, time);
 
     ctx.restore();
   }
@@ -93,41 +107,90 @@ class FloatingKrathong {
     ctx.restore();
   }
 
-  drawNameTag(ctx, time) {
-    // Elegant floating name ribbon over or under krathong
-    ctx.save();
-    ctx.translate(0, this.size * 0.42);
-
+  drawWishTag(ctx, time) {
+    const isMobile = window.innerWidth <= 768;
     const isHighlight = this.isUser || this.isHovered;
-    const text = this.name.length > 14 ? this.name.substring(0, 14) + '…' : this.name;
 
-    ctx.font = isHighlight ? 'bold 12px Kanit, Sarabun, sans-serif' : '11px Kanit, Sarabun, sans-serif';
-    const textWidth = ctx.measureText(text).width;
-    const padX = 9;
-    const boxW = textWidth + padX * 2;
-    const boxH = 20;
+    ctx.save();
+    const offsetY = this.size * 0.44;
+    ctx.translate(0, offsetY);
 
-    // Badge Background
-    ctx.fillStyle = this.isUser ? 'rgba(255, 215, 0, 0.88)' : (this.isHovered ? 'rgba(255, 255, 255, 0.92)' : 'rgba(15, 25, 45, 0.65)');
-    ctx.strokeStyle = this.isUser ? '#ffb300' : 'rgba(255, 255, 255, 0.3)';
-    ctx.lineWidth = 1;
+    // Format Name
+    const rawName = this.name.length > 18 ? this.name.substring(0, 18) + '…' : this.name;
+    const nameText = this.isUser ? `✨ ${rawName}` : rawName;
 
+    // Format Wish Message
+    const maxWishLen = isMobile ? 22 : 32;
+    const rawWish = this.wish.length > maxWishLen ? this.wish.substring(0, maxWishLen) + '…' : this.wish;
+    const wishText = `"${rawWish}"`;
+
+    // Font styles
+    const nameFontSize = isMobile ? 10 : 11.5;
+    const wishFontSize = isMobile ? 9 : 10.5;
+
+    ctx.font = `bold ${nameFontSize}px 'Kanit', sans-serif`;
+    const nameW = ctx.measureText(nameText).width;
+
+    ctx.font = `${wishFontSize}px 'Sarabun', 'Kanit', sans-serif`;
+    const wishW = ctx.measureText(wishText).width;
+
+    const padX = isMobile ? 9 : 12;
+    const boxW = Math.max(nameW, wishW) + padX * 2;
+    const boxH = isMobile ? 32 : 38;
+
+    this.badgeBounds = {
+      w: boxW,
+      h: boxH,
+      offsetY: offsetY
+    };
+
+    // Card styling
+    if (this.isUser) {
+      // Golden shimmering aura for user's krathong
+      ctx.fillStyle = 'rgba(255, 248, 225, 0.96)';
+      ctx.strokeStyle = '#ffa000';
+      ctx.lineWidth = 1.8;
+      ctx.shadowColor = 'rgba(255, 215, 0, 0.7)';
+      ctx.shadowBlur = 12;
+    } else if (this.isHovered) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+      ctx.strokeStyle = '#ffd54f';
+      ctx.lineWidth = 1.2;
+      ctx.shadowColor = 'rgba(255, 255, 255, 0.5)';
+      ctx.shadowBlur = 8;
+    } else {
+      ctx.fillStyle = 'rgba(8, 20, 38, 0.82)';
+      ctx.strokeStyle = 'rgba(255, 215, 0, 0.4)';
+      ctx.lineWidth = 1;
+      ctx.shadowBlur = 0;
+    }
+
+    // Connect pointer
     ctx.beginPath();
-    ctx.roundRect(-boxW / 2, 0, boxW, boxH, 10);
+    ctx.moveTo(-5, 0);
+    ctx.lineTo(0, -4);
+    ctx.lineTo(5, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Main Card
+    ctx.beginPath();
+    ctx.roundRect(-boxW / 2, 0, boxW, boxH, 8);
     ctx.fill();
     ctx.stroke();
 
-    // User Crown / Lotus Icon for personal krathong
-    if (this.isUser) {
-      ctx.fillStyle = '#b78103';
-      ctx.font = '9px Kanit';
-      ctx.fillText('✨', -boxW / 2 + 3, 14);
-    }
+    ctx.shadowBlur = 0;
 
-    // Name Text
-    ctx.fillStyle = this.isUser ? '#3e2723' : (this.isHovered ? '#1a237e' : '#ffffff');
+    // Line 1: Name
+    ctx.font = `bold ${nameFontSize}px 'Kanit', sans-serif`;
+    ctx.fillStyle = this.isUser ? '#3e2723' : (this.isHovered ? '#0d47a1' : '#ffd54f');
     ctx.textAlign = 'center';
-    ctx.fillText(text, this.isUser ? 4 : 0, 14);
+    ctx.fillText(nameText, 0, isMobile ? 12 : 14);
+
+    // Line 2: Wish Text (ข้อความคำอธิษฐาน)
+    ctx.font = `${wishFontSize}px 'Sarabun', 'Kanit', sans-serif`;
+    ctx.fillStyle = this.isUser ? '#4e342e' : (this.isHovered ? '#263238' : '#e0e6ed');
+    ctx.fillText(wishText, 0, isMobile ? 25 : 29);
 
     ctx.restore();
   }
@@ -166,7 +229,11 @@ class RiverSystem {
     ];
 
     communityCelebrants.forEach((c, idx) => {
-      const x = (idx / communityCelebrants.length) * window.innerWidth + (Math.random() * 80 - 40);
+      const isMobile = window.innerWidth <= 768;
+      const count = isMobile ? 4 : communityCelebrants.length;
+      if (idx >= count) return;
+
+      const x = (idx / count) * window.innerWidth + (Math.random() * 60 - 30);
       const y = window.innerHeight * (0.64 + (idx % 3) * 0.1);
       this.krathongs.push(new FloatingKrathong({
         name: c.name,
@@ -184,11 +251,10 @@ class RiverSystem {
     const krathong = new FloatingKrathong({
       ...options,
       isUser: true,
-      x: window.innerWidth * 0.5 + (Math.random() * 60 - 30),
+      x: window.innerWidth * 0.5 + (Math.random() * 40 - 20),
       y: window.innerHeight * 0.82
     });
     this.krathongs.push(krathong);
-    // Sort krathongs by Y coordinate so deeper ones render behind
     this.sortKrathongsByDepth();
     return krathong;
   }
@@ -204,7 +270,6 @@ class RiverSystem {
 
   checkHover(mouseX, mouseY) {
     let hovered = null;
-    // Check in reverse order (top rendered first)
     for (let i = this.krathongs.length - 1; i >= 0; i--) {
       const k = this.krathongs[i];
       if (!hovered && k.containsPoint(mouseX, mouseY)) {
@@ -262,8 +327,8 @@ class RiverSystem {
   }
 
   drawMoonReflection(ctx, w, h, riverTopY, time) {
-    const moonX = w * 0.78;
-    const refWidth = w * 0.18;
+    const moonX = w * (window.innerWidth <= 768 ? 0.72 : 0.78);
+    const refWidth = w * (window.innerWidth <= 768 ? 0.24 : 0.18);
     const refHeight = h - riverTopY;
 
     ctx.save();
@@ -275,7 +340,6 @@ class RiverSystem {
 
     ctx.fillStyle = moonRefGrad;
 
-    // Shimmering horizontal wave streaks under moon
     for (let y = riverTopY + 10; y < h; y += 14) {
       const progress = (y - riverTopY) / refHeight;
       const streakW = (refWidth * 0.4 + progress * refWidth) * (0.8 + Math.sin(time * 3 + y * 0.05) * 0.3);
