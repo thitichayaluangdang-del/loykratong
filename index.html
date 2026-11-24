@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ประเพณีลอยกระทงออนไลน์ ๒๕๖๙ | Loy Krathong Online Festival</title>
+  <meta name="description" content="ร่วมสืบสานประเพณีลอยกระทงออนไลน์ เลือกแบบกระทงวิจิตร กรอกชื่อและคำอธิษฐาน ปล่อยโคมลอย จุดพลุเฉลิมฉลอง พร้อมดนตรีบรรเลงและเสียงบรรยากาศเสมือนจริง">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪷</text></svg>">
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Top Navigation / Header -->
+  <header class="header-bar">
+    <div class="brand-wrapper">
+      <div class="brand-icon">🪷</div>
+      <div class="brand-text">
+        <h1>ลอยกระทงออนไลน์ ๒๕๖๙</h1>
+        <p>วันเพ็ญเดือนสิบสอง น้ำนองเต็มตลิ่ง • สืบสานประเพณีไทย</p>
+      </div>
+    </div>
+
+    <div class="top-controls">
+      <button id="btn-toggle-music" class="control-btn" title="เปิด/ปิดดนตรีไทยบรรเลง">
+        🎵 <span>ดนตรี: ปิด</span>
+      </button>
+      <button id="btn-toggle-sfx" class="control-btn active" title="เปิด/ปิดเสียงเอฟเฟกต์">
+        🔊 <span>เสียงเอฟเฟกต์: เปิด</span>
+      </button>
+      <button id="btn-clean-river" class="control-btn" title="ทำความสะอาดแม่น้ำ">
+        🌿 <span>เก็บกระทง</span>
+      </button>
+      <button id="btn-info" class="control-btn" title="ประวัติและความหมายวันลอยกระทง">
+        ℹ️ <span>ประวัติ</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Interactive Canvas System -->
+  <main id="canvas-container">
+    <canvas id="sky-canvas"></canvas>
+    <canvas id="fireworks-canvas"></canvas>
+    <canvas id="river-canvas"></canvas>
+  </main>
+
+  <!-- Sky Click Hint -->
+  <div class="sky-click-hint">
+    ✨ คลิกบนท้องฟ้าเพื่อจุดพลุ • คลิกกระทงในน้ำเพื่ออ่านคำอธิษฐาน
+  </div>
+
+  <!-- Bottom Floating Action Dock -->
+  <nav class="floating-dock">
+    <button id="btn-open-krathong-modal" class="action-btn-main">
+      <span>🪷</span> ลอยกระทงของคุณ
+    </button>
+    <button id="btn-release-lantern" class="action-btn-secondary">
+      <span>🏮</span> ปล่อยโคมลอย
+    </button>
+    <button id="btn-auto-fireworks" class="action-btn-secondary">
+      <span>🎆</span> <span>จุดพลุอัตโนมัติ</span>
+    </button>
+  </nav>
+
+  <!-- Modal 1: Create & Float Krathong -->
+  <div id="krathong-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2 class="modal-title">🪷 เลือกแบบกระทง & ขอพร</h2>
+        <button type="button" class="modal-close-btn">&times;</button>
+      </div>
+
+      <form id="krathong-form">
+        <!-- 1. Choose Krathong -->
+        <div class="section-label">🌸 ๑. เลือกรูปแบบกระทง</div>
+        <div id="krathong-options-grid" class="krathong-grid"></div>
+
+        <div id="krathong-meaning-box" style="margin-bottom: 16px; font-size: 0.85rem; color: #ffecb3; background: rgba(255,255,255,0.06); padding: 8px 12px; border-radius: 8px; border-left: 3px solid var(--primary-gold);">
+        </div>
+
+        <!-- 2. Choose Candle Color -->
+        <div class="section-label">🕯️ ๒. เลือกแสงเทียนมงคล</div>
+        <div id="candle-options" class="candle-selector"></div>
+
+        <!-- 3. Name Input -->
+        <div class="form-group">
+          <label class="form-label" for="krathong-name-input">👤 ชื่อ-นามสกุล หรือนามแฝง</label>
+          <input type="text" id="krathong-name-input" class="form-input" placeholder="เช่น น้องมะลิ, ครอบครัวสุขสันต์ (เว้นว่างได้)" maxlength="40">
+        </div>
+
+        <!-- 4. Wish Input -->
+        <div class="form-group">
+          <label class="form-label" for="krathong-wish-input">🙏 คำอธิษฐาน & ขอขมาพระแม่คงคา</label>
+          <textarea id="krathong-wish-input" class="form-textarea" placeholder="พิมพ์คำอธิษฐานของคุณ หรือคลิกเลือกข้อความยอดนิยมด้านล่าง..."></textarea>
+          
+          <div class="section-label" style="margin-top: 10px; font-size: 0.8rem;">✨ คำอธิษฐานยอดนิยม (คลิกเพื่อเลือก):</div>
+          <div id="quick-wishes-tags" class="quick-wishes"></div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="submit-btn">
+          <span>✨</span> ปล่อยกระทงลงสู่สายน้ำ
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Release Sky Lantern -->
+  <div id="lantern-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h2 class="modal-title">🏮 ปล่อยโคมลอยยี่เป็ง</h2>
+        <button type="button" class="modal-close-btn">&times;</button>
+      </div>
+
+      <form id="lantern-form">
+        <p style="font-size: 0.9rem; color: #cfd8dc; margin-bottom: 16px; line-height: 1.5;">
+          ประเพณียี่เป็งล้านนา การปล่อยโคมลอยขึ้นสู่ฟากฟ้าเพื่อบูชาพระเกตุแก้วจุฬามณีบนสวรรค์ และปลดปล่อยทุกข์โศกให้ลอยไปกับสายลม
+        </p>
+
+        <div class="form-group">
+          <label class="form-label" for="lantern-name-input">👤 ชื่อผู้ปล่อยโคม</label>
+          <input type="text" id="lantern-name-input" class="form-input" placeholder="พิมพ์ชื่อของคุณ (หรือเว้นว่างได้)" maxlength="30">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="lantern-wish-input">✨ ข้อความขอพรบนตัวโคม</label>
+          <input type="text" id="lantern-wish-input" class="form-input" placeholder="เช่น ขอให้มีแต่ความสุขสมหวัง สมปรารถนา" maxlength="60">
+        </div>
+
+        <button type="submit" class="submit-btn">
+          <span>🏮</span> ปล่อยโคมลอยขึ้นสู่ฟ้า
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: View Floating Krathong Wish Card -->
+  <div id="wish-view-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 480px;">
+      <div class="modal-header">
+        <h2 class="modal-title">🪷 คำอธิษฐานกระทง</h2>
+        <button type="button" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="wish-card-display">
+        <div id="wish-card-avatar" class="wish-card-avatar"></div>
+        <div id="wish-card-name" class="wish-card-name"></div>
+        <div id="wish-card-type" style="font-size: 0.85rem; color: #ffd54f; margin-bottom: 4px;"></div>
+        <div id="wish-card-date" class="wish-card-date"></div>
+        <div id="wish-card-quote" class="wish-card-quote"></div>
+
+        <div class="wish-card-actions">
+          <button type="button" class="control-btn active" onclick="document.getElementById('wish-view-modal').classList.remove('active')">
+            <span>🙏</span> อนุโมทนาบุญ / ปิด
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Festival Information -->
+  <div id="info-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 540px;">
+      <div class="modal-header">
+        <h2 class="modal-title">ℹ️ ประวัติวันลอยกระทง</h2>
+        <button type="button" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div style="font-size: 0.95rem; line-height: 1.7; color: #eceff1;">
+        <h3 style="color: var(--primary-gold); margin-bottom: 8px; font-size: 1.15rem;">ความสำคัญและวัตถุประสงค์</h3>
+        <p style="margin-bottom: 12px;">
+          ประเพณีลอยกระทงตรงกับวันขึ้น ๑๕ ค่ำ เดือน ๑๒ ของทุกปี เพื่อเป็นการแสดงความกตัญญูกตเวทิตา และขอขมาต่อ <strong>"พระแม่คงคา"</strong> ที่มนุษย์ได้ใช้น้ำอุปโภคบริโภค รวมถึงทิ้งสิ่งปฏิกูลลงสู่แม่น้ำลำคลอง
+        </p>
+
+        <h3 style="color: var(--primary-gold); margin-bottom: 8px; font-size: 1.15rem;">🌿 ลอยกระทงออนไลน์รักษ์สิ่งแวดล้อม</h3>
+        <p style="margin-bottom: 14px;">
+          การร่วมลอยกระทงในรูปแบบดิจิทัล เป็นอีกหนึ่งวิธีที่ช่วยสืบสานประเพณีอันงดงามของไทย โดยไม่สร้างขยะในแม่น้ำลำคลอง ช่วยรักษาทัศนียภาพ และปกป้องสัตว์น้ำในระบบนิเวศน์
+        </p>
+
+        <div style="text-align: center; margin-top: 18px;">
+          <button type="button" class="submit-btn" onclick="document.getElementById('info-modal').classList.remove('active')">
+            เข้าใจแล้ว ร่วมลอยกระทงกันเลย!
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic Scripts -->
+  <script src="js/audio.js"></script>
+  <script src="js/krathongs.js"></script>
+  <script src="js/fireworks.js"></script>
+  <script src="js/lanterns.js"></script>
+  <script src="js/river.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

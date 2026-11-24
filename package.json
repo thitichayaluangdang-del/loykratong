@@ -1,0 +1,20 @@
+{
+  "name": "loykratong-online",
+  "version": "1.0.0",
+  "description": "เว็บลอยกระทงออนไลน์ พร้อมเลือกแบบกระทง ปล่อยโคมลอย จุดพลุ และระบบเสียงเสมือนจริง",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test.js"
+  },
+  "keywords": [
+    "loykratong",
+    "thailand",
+    "festival",
+    "web-audio",
+    "canvas-animation"
+  ],
+  "author": "Thitichaya",
+  "license": "MIT"
+}
