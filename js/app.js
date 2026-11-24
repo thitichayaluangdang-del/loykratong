@@ -1,4 +1,4 @@
-// js/app.js - Main Application Controller & Canvas Animation Loop (Mobile & PC Enhanced)
+// js/app.js - Main Application Controller with High-DPI (Retina) Sharp Canvas Rendering
 class App {
   constructor() {
     this.skyCanvas = document.getElementById('sky-canvas');
@@ -10,6 +10,7 @@ class App {
     this.riverCanvas = document.getElementById('river-canvas');
     this.riverCtx = this.riverCanvas.getContext('2d');
 
+    this.dpr = Math.min(window.devicePixelRatio || 1, 3);
     this.stars = [];
     this.shootingStars = [];
     this.selectedKrathongType = 'traditional';
@@ -41,10 +42,13 @@ class App {
   resizeCanvases() {
     const w = window.innerWidth;
     const h = window.innerHeight;
+    this.dpr = Math.min(window.devicePixelRatio || 1, 3); // Crisp High-DPI / Retina buffer
 
     [this.skyCanvas, this.fireworksCanvas, this.riverCanvas].forEach(canvas => {
-      canvas.width = w;
-      canvas.height = h;
+      canvas.width = Math.round(w * this.dpr);
+      canvas.height = Math.round(h * this.dpr);
+      canvas.style.width = `${w}px`;
+      canvas.style.height = `${h}px`;
     });
 
     this.initStars();
@@ -57,7 +61,7 @@ class App {
       this.stars.push({
         x: Math.random() * window.innerWidth,
         y: Math.random() * (window.innerHeight * 0.52),
-        r: 0.6 + Math.random() * 1.4,
+        r: 0.7 + Math.random() * 1.5,
         twinkleSpeed: 1.5 + Math.random() * 3,
         twinklePhase: Math.random() * Math.PI * 2,
         color: Math.random() > 0.2 ? '#ffffff' : (Math.random() > 0.5 ? '#fff9c4' : '#b3e5fc')
@@ -246,10 +250,7 @@ class App {
           window.fireworksSystem.launch(window.innerWidth * 0.5, window.innerHeight * 0.25);
         }, 300);
 
-        // Close form modal
         this.closeModal('krathong-modal');
-
-        // Show Wish Certificate / Confirmation Card
         this.showWishCard(userKrathong);
       });
     }
@@ -275,38 +276,33 @@ class App {
       });
     }
 
-    // River Canvas Interaction (Click & Touch support for Mobile and PC)
+    // River Canvas Interaction
     const handleActionPoint = (clientX, clientY) => {
       const rect = this.riverCanvas.getBoundingClientRect();
       const x = clientX - rect.left;
       const y = clientY - rect.top;
 
-      // Check if clicked or tapped on a floating krathong or its wish card
       const clickedKrathong = window.riverSystem.checkHover(x, y);
       if (clickedKrathong) {
         this.showWishCard(clickedKrathong);
         return;
       }
 
-      // If clicked or tapped on sky portion, launch fireworks!
       if (y < window.innerHeight * 0.52) {
         window.fireworksSystem.launch(x, y);
       }
     };
 
-    // PC Click
     this.riverCanvas.addEventListener('click', (e) => {
       handleActionPoint(e.clientX, e.clientY);
     });
 
-    // Mobile Touch
     this.riverCanvas.addEventListener('touchstart', (e) => {
       if (e.touches && e.touches.length > 0) {
         handleActionPoint(e.touches[0].clientX, e.touches[0].clientY);
       }
     }, { passive: true });
 
-    // PC Mouse Hover
     this.riverCanvas.addEventListener('mousemove', (e) => {
       const rect = this.riverCanvas.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -315,7 +311,7 @@ class App {
       this.riverCanvas.style.cursor = hovered ? 'pointer' : (y < window.innerHeight * 0.52 ? 'crosshair' : 'default');
     });
 
-    // PC Keyboard Shortcuts
+    // Keyboard Shortcuts
     window.addEventListener('keydown', (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       if (e.code === 'Space') {
@@ -332,7 +328,6 @@ class App {
       }
     });
 
-    // Audio init on first interaction
     document.addEventListener('pointerdown', () => {
       window.soundSystem.init();
     }, { once: true });
@@ -389,12 +384,14 @@ class App {
   }
 
   drawSky(time) {
-    const w = this.skyCanvas.width;
-    const h = this.skyCanvas.height;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
     const ctx = this.skyCtx;
     const isMobile = window.innerWidth <= 768;
 
-    ctx.clearRect(0, 0, w, h);
+    ctx.clearRect(0, 0, this.skyCanvas.width, this.skyCanvas.height);
+    ctx.save();
+    ctx.scale(this.dpr, this.dpr);
 
     // Deep Night Sky Gradient
     const skyGrad = ctx.createLinearGradient(0, 0, 0, h * 0.52);
@@ -423,7 +420,7 @@ class App {
       const ss = this.shootingStars[i];
       ctx.save();
       ctx.strokeStyle = `rgba(255, 255, 255, ${ss.alpha})`;
-      ctx.lineWidth = 1.8;
+      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.moveTo(ss.x, ss.y);
       ctx.lineTo(ss.x - Math.cos(ss.angle) * ss.len, ss.y - Math.sin(ss.angle) * ss.len);
@@ -442,11 +439,13 @@ class App {
     // Full Moon (วันเพ็ญเดือน ๑๒)
     const moonX = w * (isMobile ? 0.72 : 0.78);
     const moonY = h * (isMobile ? 0.22 : 0.2);
-    const moonRadius = isMobile ? 38 : 54;
+    const moonRadius = isMobile ? 40 : 54;
     this.drawFullMoon(ctx, moonX, moonY, moonRadius, time);
 
     // Horizon Silhouettes
     this.drawHorizonSilhouettes(ctx, w, h * 0.52);
+
+    ctx.restore();
   }
 
   drawFullMoon(ctx, cx, cy, radius, time) {
@@ -455,8 +454,8 @@ class App {
     // Outer warm atmospheric glow
     const glowPulse = Math.sin(time * 1.5) * 4;
     const glow = ctx.createRadialGradient(cx, cy, radius * 0.8, cx, cy, radius * 2.8 + glowPulse);
-    glow.addColorStop(0, 'rgba(255, 248, 220, 0.45)');
-    glow.addColorStop(0.3, 'rgba(255, 235, 170, 0.18)');
+    glow.addColorStop(0, 'rgba(255, 248, 220, 0.48)');
+    glow.addColorStop(0.3, 'rgba(255, 235, 170, 0.2)');
     glow.addColorStop(0.7, 'rgba(255, 215, 100, 0.05)');
     glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
 
@@ -478,7 +477,7 @@ class App {
     ctx.fill();
 
     // Subtle Maria / Craters
-    ctx.fillStyle = 'rgba(180, 150, 110, 0.18)';
+    ctx.fillStyle = 'rgba(180, 150, 110, 0.2)';
     ctx.beginPath();
     ctx.ellipse(cx - radius * 0.25, cy - radius * 0.1, radius * 0.28, radius * 0.22, 0.3, 0, Math.PI * 2);
     ctx.fill();
@@ -528,18 +527,23 @@ class App {
     // 1. Sky
     this.drawSky(this.time);
 
-    // 2. Fireworks & Lanterns
+    // 2. Fireworks & Lanterns (scaled to Retina DPR)
     this.fireworksCtx.clearRect(0, 0, this.fireworksCanvas.width, this.fireworksCanvas.height);
+    this.fireworksCtx.save();
+    this.fireworksCtx.scale(this.dpr, this.dpr);
     window.fireworksSystem.update();
     window.fireworksSystem.draw(this.fireworksCtx);
-
     window.lanternSystem.update();
     window.lanternSystem.draw(this.fireworksCtx, this.time);
+    this.fireworksCtx.restore();
 
-    // 3. River & Floating Krathongs
+    // 3. River & Floating Krathongs (scaled to Retina DPR)
     this.riverCtx.clearRect(0, 0, this.riverCanvas.width, this.riverCanvas.height);
+    this.riverCtx.save();
+    this.riverCtx.scale(this.dpr, this.dpr);
     window.riverSystem.update(dt, this.time);
     window.riverSystem.draw(this.riverCtx, this.time);
+    this.riverCtx.restore();
 
     requestAnimationFrame((t) => this.loop(t));
   }

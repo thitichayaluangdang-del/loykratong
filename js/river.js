@@ -31,9 +31,9 @@ class FloatingKrathong {
     const riverTop = window.innerHeight * 0.52;
     const riverBottom = window.innerHeight * 0.95;
     const ratio = Math.max(0, Math.min(1, (this.y - riverTop) / (riverBottom - riverTop)));
-    // Adaptive size for mobile and PC
-    const minSize = isMobile ? 36 : 46;
-    const maxSize = isMobile ? 72 : 105;
+    // Crisper, larger scale so fine details & flowers are clearly visible
+    const minSize = isMobile ? 56 : 72;
+    const maxSize = isMobile ? 98 : 136;
     this.size = minSize + ratio * (maxSize - minSize);
   }
 
@@ -125,8 +125,8 @@ class FloatingKrathong {
     const wishText = `"${rawWish}"`;
 
     // Font styles
-    const nameFontSize = isMobile ? 10 : 11.5;
-    const wishFontSize = isMobile ? 9 : 10.5;
+    const nameFontSize = isMobile ? 10.5 : 12;
+    const wishFontSize = isMobile ? 9.5 : 11;
 
     ctx.font = `bold ${nameFontSize}px 'Kanit', sans-serif`;
     const nameW = ctx.measureText(nameText).width;
@@ -134,9 +134,9 @@ class FloatingKrathong {
     ctx.font = `${wishFontSize}px 'Sarabun', 'Kanit', sans-serif`;
     const wishW = ctx.measureText(wishText).width;
 
-    const padX = isMobile ? 9 : 12;
+    const padX = isMobile ? 10 : 14;
     const boxW = Math.max(nameW, wishW) + padX * 2;
-    const boxH = isMobile ? 32 : 38;
+    const boxH = isMobile ? 36 : 42;
 
     this.badgeBounds = {
       w: boxW,
@@ -185,12 +185,12 @@ class FloatingKrathong {
     ctx.font = `bold ${nameFontSize}px 'Kanit', sans-serif`;
     ctx.fillStyle = this.isUser ? '#3e2723' : (this.isHovered ? '#0d47a1' : '#ffd54f');
     ctx.textAlign = 'center';
-    ctx.fillText(nameText, 0, isMobile ? 12 : 14);
+    ctx.fillText(nameText, 0, isMobile ? 14 : 16);
 
     // Line 2: Wish Text (ข้อความคำอธิษฐาน)
     ctx.font = `${wishFontSize}px 'Sarabun', 'Kanit', sans-serif`;
     ctx.fillStyle = this.isUser ? '#4e342e' : (this.isHovered ? '#263238' : '#e0e6ed');
-    ctx.fillText(wishText, 0, isMobile ? 25 : 29);
+    ctx.fillText(wishText, 0, isMobile ? 27 : 31);
 
     ctx.restore();
   }
@@ -288,8 +288,8 @@ class RiverSystem {
   }
 
   draw(ctx, time) {
-    const w = ctx.canvas.width;
-    const h = ctx.canvas.height;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
     const riverTopY = h * 0.52;
 
     // 1. River Gradient Background
